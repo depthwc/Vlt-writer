@@ -119,12 +119,12 @@ export function LetterTree({ hand, groups, v, sel, onSel, picking, picked, onPic
         return (
           <section key={key} aria-label={name}>
             <button onClick={() => setShut((s) => flip(s, key))} aria-expanded={isOpen}
-              className="mb-1.5 flex w-full items-center gap-2 rounded-md px-1 py-1 text-left hover:bg-surface">
+              className="mb-1.5 flex w-full flex-wrap items-center gap-x-2 gap-y-0.5 rounded-md px-1 py-1 text-left hover:bg-surface">
               <ChevronRight className={cn('size-4 shrink-0 text-muted transition-transform', isOpen && 'rotate-90')} />
-              <h3 className="text-[0.9rem] font-semibold">{name}</h3>
-              {total > 0 && <span className="text-[0.8rem] tabular-nums text-muted">{have}/{total}</span>}
-              <span className="text-[0.8rem] tabular-nums text-muted">· {t(versions === 1 ? 'hands.nVersion' : 'hands.nVersions', { n: versions })}</span>
-              {flagged > 0 && <span className="text-[0.8rem] tabular-nums text-redpen">{t('hands.toLook', { n: flagged })}</span>}
+              <h3 className="whitespace-nowrap text-[0.9rem] font-semibold">{name}</h3>
+              {total > 0 && <span className="whitespace-nowrap text-[0.8rem] tabular-nums text-muted">{have}/{total}</span>}
+              <span className="whitespace-nowrap text-[0.8rem] tabular-nums text-muted">· {t(versions === 1 ? 'hands.nVersion' : 'hands.nVersions', { n: versions })}</span>
+              {flagged > 0 && <span className="whitespace-nowrap text-[0.8rem] tabular-nums text-redpen">{t('hands.toLook', { n: flagged })}</span>}
             </button>
             {isOpen && (
               <>

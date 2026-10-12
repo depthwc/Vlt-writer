@@ -111,7 +111,7 @@ const en = {
     cornersHint: 'Drag the four corners onto the sheet edges', lines: '{{n}} lines', noEdges: 'The whole photo is the sheet. Drag the corners to change that',
     addShot: 'Add another photo of this paper', shots: 'Photos', removeShot: 'Remove photo', editLines: 'Edit lines',
     addLine: 'Add line', deleteLine: 'Delete line', linesHint: 'Drag a line to move it, its dots to bend it. Alt+click adds a line.', areaHint: 'Drag the edges of the writing area, or their dots to bend them. Click the line to start on.', straighten: 'Straighten edges',
-    startHere: 'Start on line {{n}}', bendPoint: 'Line point {{n}}', side: 'Page', sides: { left: 'Left page', right: 'Right page', any: 'Any paper' },
+    startHere: 'Start on line {{n}}', bendPoint: 'Line point {{n}}', side: 'Page', sides: { left: 'Left page', right: 'Right page', any: 'Any paper' }, sidesShort: { left: 'Left', right: 'Right', any: 'Any' },
     groups: { right: 'Notebook · right pages', left: 'Notebook · left pages', any: 'Any paper' },
     groupHint: { right: 'Photos of right-hand pages', left: 'Photos of left-hand pages', any: 'A loose sheet, white paper, anything' },
     addTo: 'Add to {{group}}', photos: '{{n}} photos', notebookHint: 'A notebook document takes left and right pages in turn: left, right, left…',

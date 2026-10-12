@@ -202,7 +202,7 @@ export default function HandsWorkspace() {
         <div className="min-h-0 flex-1"><Guide hand={view} onChanged={refresh} focus={focus} onOwnPage={() => setPhoto(true)} /></div>
       ) : (
       <div className="flex min-h-0 flex-1">
-        <aside className="w-64 shrink-0 overflow-auto border-r border-line bg-surface px-4 py-3" aria-label={t('hands.coverage')}>
+        <aside className="w-56 shrink-0 overflow-auto border-r border-line bg-surface px-4 py-3 lg:w-64" aria-label={t('hands.coverage')}>
           <h2 className="text-[0.85rem] font-semibold">{t('hands.coverage')}</h2>
           <p className="mb-3 text-[0.8rem] text-muted">{t('hands.letters', { n: written })}</p>
           {view.coverage.map((c) => {
@@ -235,7 +235,7 @@ export default function HandsWorkspace() {
         </aside>
 
         <section className="flex min-w-0 flex-1 flex-col" aria-label={t('hands.title')}>
-          <div className="flex h-11 items-center gap-3 border-b border-line px-4">
+          <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line px-4 py-1.5">
             {picking ? (
               <>
                 <span className="text-[0.85rem] font-medium tabular-nums" aria-live="polite">{t('hands.selected', { n: picked.size })}</span>
@@ -253,7 +253,7 @@ export default function HandsWorkspace() {
                   { value: 'flagged', label: `${t('hands.flagged')} (${flaggedCount})` },
                   { value: 'off', label: t('common.off') },
                 ]} />
-                <div className="relative w-44">
+                <div className="relative w-32 lg:w-44">
                   <Search className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted" aria-hidden />
                   <Input value={find} onChange={(e) => setFind(e.target.value)} placeholder={t('hands.find')} aria-label={t('hands.find')} className="pl-7" />
                 </div>
@@ -273,7 +273,7 @@ export default function HandsWorkspace() {
           </div>
         </section>
 
-        <aside className="w-[21rem] shrink-0 border-l border-line bg-surface" aria-label={t('hands.repair.title')}>
+        <aside className="w-72 shrink-0 border-l border-line bg-surface lg:w-[21rem]" aria-label={t('hands.repair.title')}>
           {selected ? (
             <RepairPanel key={selected.id} hand={m.id} g={selected} onChanged={refresh} onDeleted={() => { setSel(null); void refresh() }} />
           ) : (

@@ -113,7 +113,7 @@ const uz: Dict = {
     cornersHint: 'Toʻrtta burchakni varaq chetlariga torting', lines: '{{n}} ta chiziq', noEdges: 'Butun surat — varaq. Oʻzgartirish uchun burchaklarni torting',
     addShot: 'Shu qogʻozning yana bir rasmini qoʻshish', shots: 'Rasmlar', removeShot: 'Rasmni olib tashlash', editLines: 'Chiziqlarni tahrirlash',
     addLine: 'Chiziq qoʻshish', deleteLine: 'Chiziqni oʻchirish', linesHint: 'Chiziqni surish uchun torting, egish uchun nuqtalarini torting. Alt+bosish chiziq qoʻshadi.', areaHint: 'Yozish maydoni chetlarini yoki egish uchun nuqtalarini torting. Boshlanadigan qatorni bosing.', straighten: 'Chetlarni toʻgʻrilash',
-    startHere: '{{n}}-qatordan boshlash', bendPoint: 'Chiziq nuqtasi {{n}}', side: 'Sahifa', sides: { left: 'Chap sahifa', right: 'Oʻng sahifa', any: 'Istalgan qogʻoz' },
+    startHere: '{{n}}-qatordan boshlash', bendPoint: 'Chiziq nuqtasi {{n}}', side: 'Sahifa', sides: { left: 'Chap sahifa', right: 'Oʻng sahifa', any: 'Istalgan qogʻoz' }, sidesShort: { left: 'Chap', right: 'Oʻng', any: 'Istalgan' },
     groups: { right: 'Daftar · oʻng sahifalar', left: 'Daftar · chap sahifalar', any: 'Istalgan qogʻoz' },
     groupHint: { right: 'Oʻng sahifalar rasmlari', left: 'Chap sahifalar rasmlari', any: 'Alohida varaq, oq qogʻoz, istalgani' },
     addTo: 'Qoʻshish: {{group}}', photos: '{{n}} ta rasm', notebookHint: 'Daftardagi hujjat chap va oʻng sahifalarga navbat bilan yoziladi: chap, oʻng, chap…',

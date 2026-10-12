@@ -327,7 +327,7 @@ function PaperEditor({ view, onChange }: { view: PaperView; onChange: (v: PaperV
   return (
     <div className="flex min-h-0 min-w-0 flex-1">
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-12 items-center gap-2 border-b border-line bg-surface px-3">
+        <div className="flex min-h-12 flex-wrap items-center gap-x-2 gap-y-1.5 border-b border-line bg-surface px-3 py-1.5">
           <Segmented<Mode> label={t('papers.corners')} value={mode} onChange={(md) => { setMode(md); setSel(null) }}
             options={[{ value: 'corners', label: t('papers.corners') }, { value: 'lines', label: t('papers.editLines') }, { value: 'area', label: t('papers.writeArea') }]} />
           <span className="min-w-0 flex-1 truncate text-[0.8rem] text-muted">{hint}</span>
@@ -376,12 +376,12 @@ function PaperEditor({ view, onChange }: { view: PaperView; onChange: (v: PaperV
           </Tip>
         </div>
       </div>
-      <aside className="w-[18.5rem] shrink-0 overflow-auto border-l border-line bg-surface px-4 py-3" aria-label={t('papers.writeArea')}>
+      <aside className="w-64 shrink-0 overflow-auto border-l border-line bg-surface px-4 py-3 lg:w-[18.5rem]" aria-label={t('papers.writeArea')}>
         <Row label={t('papers.name')} htmlFor="p-name" stack>
           <Input id="p-name" value={name} onChange={(e) => setName(e.target.value)} onBlur={() => name !== m.name && patch({ name })} />
         </Row>
         <Row label={t('papers.side')} stack>
-          <Segmented<PaperSide> label={t('papers.side')} value={m.side} onChange={(side) => patch({ side })} options={(['left', 'right', 'any'] as PaperSide[]).map((k) => ({ value: k, label: t(`papers.sides.${k}`) }))} className="w-full" />
+          <Segmented<PaperSide> label={t('papers.side')} value={m.side} onChange={(side) => patch({ side })} options={(['left', 'right', 'any'] as PaperSide[]).map((k) => ({ value: k, label: t(`papers.sidesShort.${k}`) }))} className="w-full" />
         </Row>
         <Row label={t('papers.size')} stack>
           <Select label={t('papers.size')} value={m.size} onValueChange={(sz) => run(api.calibratePaper(m.id, { shot, corners, size: sz }))} options={[...Object.keys(sizes).map((k) => ({ value: k, label: `${k} (${sizes[k][0]} × ${sizes[k][1]} mm)` })), ...(sizes[m.size] ? [] : [{ value: m.size, label: t('papers.measured', { w: size[0], h: size[1] }) }])]} />
@@ -471,7 +471,7 @@ export default function PapersWorkspace() {
 
   return (
     <div className="flex h-full">
-      <aside className="flex w-64 shrink-0 flex-col border-r border-line bg-surface" aria-label={t('papers.title')}>
+      <aside className="flex w-52 shrink-0 flex-col border-r border-line bg-surface lg:w-64" aria-label={t('papers.title')}>
         <div className="flex h-12 items-center border-b border-line px-3">
           <h1 className="text-[0.95rem] font-semibold">{t('papers.title')}</h1>
         </div>

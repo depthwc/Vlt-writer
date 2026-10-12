@@ -48,6 +48,17 @@ fn main() {
                 .flatten()
                 .find(|d| d.join("pdfium.dll").exists());
             app.manage(state::AppState::new(lib, pdfium));
+            // a small screen (a 1366×768 laptop at 125%): the window fills it rather than spilling off it
+            if std::env::var("HW_DATA").is_err() {
+                if let Some(w) = app.get_webview_window("main") {
+                    if let (Ok(Some(m)), Ok(size)) = (w.current_monitor(), w.outer_size()) {
+                        let area = m.work_area().size;
+                        if size.width > area.width || size.height > area.height {
+                            let _ = w.maximize();
+                        }
+                    }
+                }
+            }
             // a copy of a library opened for testing says so, and with HW_OFFSCREEN stays out of
             // the way of the person's own app (off screen, not on the taskbar)
             if std::env::var("HW_DATA").is_ok() {

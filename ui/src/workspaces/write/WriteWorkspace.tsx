@@ -212,7 +212,7 @@ export default function WriteWorkspace() {
         </Tip>
       </header>
       <div className="flex min-h-0 flex-1">
-        <section className={`w-[38%] min-w-[20rem] max-w-[40rem] border-r border-line ${over ? 'ring-4 ring-inset ring-ink/40' : ''}`} aria-label={t('write.name')}>
+        <section className={`w-[32%] min-w-[15rem] max-w-[40rem] border-r border-line lg:w-[38%] lg:min-w-[20rem] ${over ? 'ring-4 ring-inset ring-ink/40' : ''}`} aria-label={t('write.name')}>
           <DocEditor key={project.id} ref={editor} doc={project.doc} onChange={(doc, source) => update({ doc, source })} />
         </section>
         <section className="relative min-w-0 flex-1" aria-label={t('write.pageLabel')}>
@@ -236,7 +236,7 @@ export default function WriteWorkspace() {
             </div>
           )}
         </section>
-        <aside className="w-[19.5rem] shrink-0 overflow-auto border-l border-line bg-surface" aria-label={t('inspector.style')}>
+        <aside className="w-72 shrink-0 overflow-auto border-l border-line bg-surface lg:w-[19.5rem]" aria-label={t('inspector.style')}>
           <Inspector project={project} update={update} hands={hands} papers={papers} info={info} mode={mode}
             preview={preview} setPreview={setPreview} presets={presets} handInk={handInk} />
         </aside>
