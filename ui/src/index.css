@@ -1,0 +1,177 @@
+@import "tailwindcss";
+@import "@fontsource-variable/onest";
+@import "katex/dist/katex.min.css";
+
+/* Black and white: white pages with black ink, or the reverse. Colour belongs to the content
+   (the paper photos, your ink); red only marks a problem. */
+:root {
+  --paper: #f4f4f4;
+  --paper-2: #ededed;
+  --surface: #ffffff;
+  --grid: #e3e3e3;
+  --line: #d9d9d9;
+  --ink: #111111;
+  --ink-hover: #000000;
+  --ink-soft: #ebebeb;
+  --on-ink: #ffffff;
+  --graphite: #111111;
+  --muted: #666666;
+  --redpen: #c62f28;
+  --redpen-soft: #fbe9e7;
+  --ok: #111111;
+  --shadow: 0 6px 24px rgb(0 0 0 / 0.1), 0 1px 3px rgb(0 0 0 / 0.1);
+  --ui-scale: 1;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --paper: #0b0b0b;
+  --paper-2: #121212;
+  --surface: #171717;
+  --grid: #262626;
+  --line: #2f2f2f;
+  --ink: #f2f2f2;
+  --ink-hover: #ffffff;
+  --ink-soft: #2a2a2a;
+  --on-ink: #0b0b0b;
+  --graphite: #ededed;
+  --muted: #9b9b9b;
+  --redpen: #ff6a60;
+  --redpen-soft: #3b1e1c;
+  --ok: #ededed;
+  --shadow: 0 8px 28px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
+  --color-grid: var(--grid);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-hover: var(--ink-hover);
+  --color-ink-soft: var(--ink-soft);
+  --color-on-ink: var(--on-ink);
+  --color-graphite: var(--graphite);
+  --color-muted: var(--muted);
+  --color-redpen: var(--redpen);
+  --color-redpen-soft: var(--redpen-soft);
+  --color-ok: var(--ok);
+  --font-sans: "Onest Variable", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --radius-ctl: 6px;
+  --shadow-pop: var(--shadow);
+}
+
+html {
+  font-size: calc(var(--ui-scale) * 100%);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--graphite);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+}
+
+/* a focus ring by default; controls with their own (outline-none and the like) win */
+:where(:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* a letter's picture is black ink: white ink on the black theme */
+[data-theme="dark"] .glyph-img {
+  filter: invert(1);
+}
+
+/* Squared notebook paper: the backdrop of every canvas (page, paper and letter editors). */
+.kletka {
+  background-color: var(--paper-2);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: -1px -1px;
+}
+
+/* The teacher's red-pen circle around something that needs a look. */
+.redpen-ring {
+  position: relative;
+}
+.redpen-ring::after {
+  content: "";
+  position: absolute;
+  inset: -3px -4px -2px -3px;
+  border: 1.5px solid var(--redpen);
+  border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%;
+  transform: rotate(-4deg);
+  pointer-events: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 6px;
+  border: 2px solid var(--paper);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Tiptap document */
+.doc-editor .ProseMirror {
+  outline: none;
+  min-height: 100%;
+  padding: 1.25rem 1.5rem 4rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 44rem;
+}
+.doc-editor .ProseMirror h1 { font-size: 1.35rem; font-weight: 650; margin: 0.4em 0 0.3em; }
+.doc-editor .ProseMirror h2 { font-size: 1.15rem; font-weight: 650; margin: 0.6em 0 0.3em; }
+.doc-editor .ProseMirror h3 { font-size: 1rem; font-weight: 650; margin: 0.6em 0 0.2em; }
+.doc-editor .ProseMirror p { margin: 0.35em 0; }
+.doc-editor .ProseMirror ul, .doc-editor .ProseMirror ol { padding-left: 1.4em; margin: 0.35em 0; }
+.doc-editor .ProseMirror ul { list-style: disc; }
+.doc-editor .ProseMirror ol { list-style: decimal; }
+.doc-editor .ProseMirror hr { border: 0; border-top: 1.5px solid var(--ink); margin: 1em 0; opacity: 0.6; }
+.doc-editor .ProseMirror table { border-collapse: collapse; margin: 0.6em 0; table-layout: fixed; width: 100%; }
+.doc-editor .ProseMirror td, .doc-editor .ProseMirror th { border: 1px solid var(--line); padding: 0.25em 0.5em; vertical-align: top; position: relative; }
+.doc-editor .ProseMirror th { background: var(--paper-2); font-weight: 600; text-align: left; }
+.doc-editor .ProseMirror .selectedCell::after { content: ""; position: absolute; inset: 0; background: var(--ink-soft); opacity: 0.6; pointer-events: none; }
+.doc-editor .ProseMirror .column-resize-handle { position: absolute; right: -2px; top: 0; bottom: 0; width: 4px; background: var(--ink); }
+.doc-editor .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--muted); float: left; height: 0; pointer-events: none; }
+.doc-editor .ProseMirror .page-break { border: 0; border-top: 2px dashed var(--line); margin: 1.2em 0; position: relative; }
+.doc-editor .ProseMirror .tiptap-mathematics-render { cursor: pointer; padding: 0 0.15em; border-radius: 4px; }
+.doc-editor .ProseMirror .tiptap-mathematics-render:hover { background: var(--ink-soft); }
+
+[data-motion="reduce"] *,
+[data-motion="reduce"] ::before,
+[data-motion="reduce"] ::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

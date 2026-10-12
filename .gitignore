@@ -1,0 +1,23 @@
+# build output and dependencies
+target/
+node_modules/
+ui/dist/
+src-tauri/gen/
+*.log
+
+# personal data never belongs here: handwriting photos, samples, libraries (keep them outside the
+# repository; the app's own library is in %APPDATA%)
+my_writing/
+samples/
+requireds_image/
+library/
+*.hand
+*.db
+*.db-journal
+*.db-wal
+
+# editors and the OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

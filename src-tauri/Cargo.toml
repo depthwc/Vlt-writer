@@ -1,0 +1,22 @@
+[package]
+name = "vlt-writer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Write documents in your own handwriting on real paper photos"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+hw-core.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+parking_lot.workspace = true
+rayon.workspace = true
+image.workspace = true
+base64 = "0.22"
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
