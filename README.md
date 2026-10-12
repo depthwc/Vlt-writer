@@ -2,7 +2,7 @@
 
 <h1 align="center">Vlt-writer</h1>
 
-<p align="center">Writes your documents in your own handwriting, on photos of your own paper.<br>Windows app. Everything stays on your computer.</p>
+<p align="center">Writes your documents in your own handwriting, on photos of your own paper.<br>For Windows 10 and 11 (64-bit). Everything stays on your computer.</p>
 
 <p align="center"><a href="https://github.com/depthwc/Vlt-writer/releases/latest"><img src="https://img.shields.io/badge/Download-Windows-7c3aed?style=for-the-badge" alt="Download for Windows"></a></p>
 
