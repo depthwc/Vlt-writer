@@ -2053,7 +2053,7 @@ checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
 
 [[package]]
 name = "hw-core"
-version = "0.17.1"
+version = "0.17.2"
 dependencies = [
  "ab_glyph",
  "anyhow",
@@ -5903,7 +5903,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vlt-writer"
-version = "0.17.1"
+version = "0.17.2"
 dependencies = [
  "anyhow",
  "base64 0.22.1",

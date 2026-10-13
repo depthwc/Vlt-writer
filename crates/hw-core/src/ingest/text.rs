@@ -77,15 +77,16 @@ pub fn from_text(src: &str) -> Vec<Block> {
     while i < lines.len() {
         let line = lines[i];
         let s = line.trim();
-        if s.is_empty() {
+        // a page break: before the empty-line test, as trim() takes the form feed for a space
+        if line.trim_matches([' ', '\t']) == "\u{c}" {
+            flush(&mut para, &mut blocks);
+            blocks.push(Block::Br);
+        } else if s.is_empty() {
             flush(&mut para, &mut blocks);
         } else if s == BLANK_LINE.to_string() {
             // an empty line the person left
             flush(&mut para, &mut blocks);
             blocks.push(Block::P { text: String::new() });
-        } else if s == "\u{c}" {
-            flush(&mut para, &mut blocks);
-            blocks.push(Block::Br);
         } else if RULE.is_match(s) {
             flush(&mut para, &mut blocks);
             blocks.push(Block::Rule);
@@ -138,6 +139,14 @@ mod tests {
             Block::P { text: String::new() },
             Block::P { text: "   ikki  uch\u{2028}tort besh".into() },
         ]);
+    }
+
+    #[test]
+    fn a_page_break_from_the_editor_is_kept() {
+        // the editor writes a page break as a form feed between empty lines
+        let b = from_text("Bir\n\n\u{c}\n\nIkki");
+        assert_eq!(b, vec![Block::P { text: "Bir".into() }, Block::Br, Block::P { text: "Ikki".into() }]);
+        assert_eq!(from_text(&crate::ingest::to_text(&b)), b);
     }
 
     #[test]

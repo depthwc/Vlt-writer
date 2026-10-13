@@ -235,6 +235,23 @@ fn varying_blur(t: &Gray, pts: &[[f64; 3]]) -> Gray {
     out
 }
 
+/// Corners (px) of the box around the ink of a transmittance layer, `margin` px wider.
+fn ink_box(t: &Gray, margin: f64) -> Vec<P2> {
+    let (mut x0, mut y0, mut x1, mut y1) = (usize::MAX, usize::MAX, 0, 0);
+    for y in (0..t.h).step_by(2) {
+        for x in (0..t.w).step_by(2) {
+            if t.d[y * t.w + x] < 0.8 {
+                (x0, y0, x1, y1) = (x0.min(x), y0.min(y), x1.max(x), y1.max(y));
+            }
+        }
+    }
+    if x0 > x1 {
+        return vec![];
+    }
+    let (a, b, c, d) = (x0 as f64 - margin, y0 as f64 - margin, x1 as f64 + margin, y1 as f64 + margin);
+    vec![[a, b], [c, b], [c, d], [a, d]]
+}
+
 /// Render one page. `photo` is the shot's photo already scaled by `opts.scale` (sRGB 0..1).
 pub fn render(paper: &PaperMeta, photo: &Rgb, hand: &Hand, elems: &[Elem], place: &Placement, opts: &RenderOpts) -> Rgb {
     let scale = opts.scale as f64;
@@ -284,7 +301,9 @@ pub fn render(paper: &PaperMeta, photo: &Rgb, hand: &Hand, elems: &[Elem], place
     if opts.random {
         camera::light(&mut lin, &opts.shot, &mut rng);
         if opts.shot.angle && opts.shot.angle_max > 0.0 && opts.shot.strength > 0.0 {
-            let keep: Vec<P2> = if shot.found { shot.corners.iter().map(|c| [c[0] * scale, c[1] * scale]).collect() } else { vec![[photo.w as f64 / 2.0, photo.h as f64 / 2.0]] };
+            // the sheet when its corners were found, and always the writing: a new angle never cuts it off
+            let mut keep: Vec<P2> = if shot.found { shot.corners.iter().map(|c| [c[0] * scale, c[1] * scale]).collect() } else { vec![[photo.w as f64 / 2.0, photo.h as f64 / 2.0]] };
+            keep.extend(ink_box(&trans, 3.0 * opts.scale as f64 + 0.006 * trans.w.max(trans.h) as f64));
             let (l2, ex) = camera::new_angle(&lin, &[trans], &keep, opts.shot.angle_max, &mut rng);
             lin = l2;
             trans = ex.into_iter().next().unwrap();

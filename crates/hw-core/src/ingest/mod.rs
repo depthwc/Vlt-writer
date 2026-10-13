@@ -72,7 +72,8 @@ pub fn to_text(blocks: &[Block]) -> String {
         out.push(String::new());
     }
     out.join("\n")
-        .trim()
+        // a page break (form feed) at either end stays
+        .trim_matches(|c: char| c.is_whitespace() && c != '\u{c}')
         .replace(SUP, "$^{")
         .replace(SUB, "$_{")
         .replace(END, "}$")

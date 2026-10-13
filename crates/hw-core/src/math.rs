@@ -181,7 +181,8 @@ pub fn layout(m: &M, c: &mut Composer, scale: f32, wi: &mut u32) -> MBox {
         M::Sup(base, up) | M::Sub(base, up) => {
             let is_sup = matches!(m, M::Sup(..));
             let b = layout(base, c, scale, wi);
-            let u = layout(up, c, scale * 0.62, wi);
+            // written by hand, exponents are only a little smaller (smaller, inside a fraction they were specks)
+            let u = layout(up, c, scale * 0.72, wi);
             let dy = if is_sup { -0.78 * xh } else { 0.38 * xh };
             let x = b.w + 0.06 * xh;
             let mut elems = b.elems;
@@ -194,8 +195,8 @@ pub fn layout(m: &M, c: &mut Composer, scale: f32, wi: &mut u32) -> MBox {
             }
         }
         M::Frac(num, den) => {
-            let n = layout(num, c, scale * 0.82, wi);
-            let d = layout(den, c, scale * 0.82, wi);
+            let n = layout(num, c, scale * 0.92, wi);
+            let d = layout(den, c, scale * 0.92, wi);
             let w = n.w.max(d.w) + 0.6 * xh;
             let axis = -0.5 * xh;
             let gap = 0.28 * xh;

@@ -995,20 +995,27 @@ impl PaperGeom {
         (n > 0).then(|| ((l + self.start as f64).round().max(0.0) as usize).min(n - 1))
     }
 
+    /// A value of line L from its writing lines: between two of them (a table's border going
+    /// down the page) it moves smoothly from one to the next instead of jumping half way.
+    fn between(&self, l: f64, v: impl Fn(usize) -> f64) -> Option<f64> {
+        let n = self.lines.len();
+        if n == 0 {
+            return None;
+        }
+        let p = (l + self.start as f64).clamp(0.0, (n - 1) as f64);
+        let j = p.floor() as usize;
+        let f = p - j as f64;
+        Some(if f < 1e-9 || j + 1 >= n { v(j) } else { (1.0 - f) * v(j) + f * v(j + 1) })
+    }
+
     /// Sheet x (mm) at distance `x` along the paper from the writing start, on line L.
     fn sheet_x(&self, x: f64, l: f64) -> f64 {
-        match self.line_at(l) {
-            Some(j) => signal::interp(x, &self.xt[j].1, &self.xt[j].0),
-            None => self.left + x,
-        }
+        self.between(l, |j| signal::interp(x, &self.xt[j].1, &self.xt[j].0)).unwrap_or(self.left + x)
     }
 
     /// How much bigger than its corners say the paper shows at sheet x on line L.
     fn mag(&self, l: f64, xm: f64) -> f64 {
-        match self.line_at(l) {
-            Some(j) => signal::interp(xm, &self.lx[j], &self.my[j]),
-            None => 1.0,
-        }
+        self.between(l, |j| signal::interp(xm, &self.lx[j], &self.my[j])).unwrap_or(1.0)
     }
 
     pub fn lines_per_page(&self) -> usize {
@@ -1160,5 +1167,17 @@ mod tests {
         // and the steps along the line with it: the same words take more of the photo
         let w = |l: f64| g.to_px(60.0, l, 0.0)[0] - g.to_px(0.0, l, 0.0)[0];
         assert!(w(10.0) / w(2.0) > 1.15, "{} {}", w(10.0), w(2.0));
+    }
+
+    #[test]
+    fn a_stroke_down_the_page_has_no_steps() {
+        // lines of different spacing put the same x at different photo x on each line
+        let g = PaperGeom::new(&sheet(|j| if (8..12).contains(&j) { 10.0 } else { 8.0 }), &Placement::default(), 1.0);
+        let x = |l: f64| g.to_px(60.0, l, 0.0)[0];
+        let per_line = (6..13).map(|j| (x(j as f64 + 1.0) - x(j as f64)).abs()).fold(0.0, f64::max);
+        assert!(per_line > 2.0, "{per_line}");
+        // a table border from line 6 to 13: it moves a little at every step, never by a line's worth
+        let step = (0..140).map(|k| (x(6.0 + (k + 1) as f64 * 0.05) - x(6.0 + k as f64 * 0.05)).abs()).fold(0.0, f64::max);
+        assert!(step < 0.25 * per_line, "step {step:.2} px, between lines {per_line:.2} px");
     }
 }

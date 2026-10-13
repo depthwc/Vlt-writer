@@ -712,6 +712,8 @@ pub struct Flow<'a> {
     l_ph: [f32; 2],
     l_x0: f32,
     words_done: u32,
+    /// the space left after the word before (narrowed around a sign such as = or +)
+    prev_gap: f32,
 }
 
 impl<'a> Flow<'a> {
@@ -720,7 +722,7 @@ impl<'a> Flow<'a> {
         let rng = Pcg64Mcg::seed_from_u64(c.p.seed.wrapping_add(7919));
         let geos = if geos.is_empty() { vec![Geometry::default()] } else { geos };
         let g = geos[0].clone();
-        let mut f = Flow { c, g, geos, rng, pages: vec![vec![]], l: 0, wi: 0, l_dy: 0.0, l_skew: 0.0, l_ph: [0.0; 2], l_x0: 0.0, words_done: 0 };
+        let mut f = Flow { c, g, geos, rng, pages: vec![vec![]], l: 0, wi: 0, l_dy: 0.0, l_skew: 0.0, l_ph: [0.0; 2], l_x0: 0.0, words_done: 0, prev_gap: 0.0 };
         f.line_noise();
         f
     }
@@ -834,6 +836,11 @@ impl<'a> Flow<'a> {
     /// One word at `x` on the line being written (or the next, when it does not fit).
     fn word(&mut self, w: &str, x: &mut f32, line: &mut Vec<(Vec<Elem>, f32, f32)>, next_x: f32, center: bool) {
         {
+            // = + : ≈ … written as words of their own: people leave less room around them
+            let sign = is_sign(w);
+            if sign && !line.is_empty() {
+                *x -= 0.5 * self.prev_gap;
+            }
             let (mut el, mut ww) = self.compose_word(w);
             if !line.is_empty() && *x + ww > self.width() {
                 let over = *x + ww - self.width();
@@ -850,6 +857,8 @@ impl<'a> Flow<'a> {
             line.push((el, *x, ww));
             // never so narrow that two words read as one
             let gap = (self.c.wgap[0] + self.n(self.c.wgap[1])).max(0.6 * self.c.wgap[0]).max(0.4) * self.c.xh * self.c.fatigue;
+            let gap = if sign { 0.5 * gap } else { gap };
+            self.prev_gap = gap;
             *x += ww + gap;
         }
     }
@@ -897,6 +906,11 @@ impl<'a> Flow<'a> {
         let e = drawn_line([x, l0, 0.0], [x, l1, 0.0], self, ruler);
         self.put(vec![e], 0.0, Some(l0), false);
     }
+}
+
+/// A word that is only a sign of a formula (not a dash, which also stands between words).
+fn is_sign(w: &str) -> bool {
+    w.chars().count() <= 2 && w.chars().all(|c| "=+:·×÷≈≤≥±→<>≠".contains(c))
 }
 
 fn shift_x(e: Elem, dx: f32) -> Elem {
@@ -948,12 +962,14 @@ fn strike(width: f32, xh: f32, pen: f32, rng: &mut Pcg64Mcg, p: f32) -> Vec<Elem
 
 /// A pen line from a to b ([x, l, dy]); slight wobble, overshoot and width variation.
 fn drawn_line(a: [f32; 3], b: [f32; 3], f: &mut Flow, ruler: bool) -> Elem {
-    let n = 24;
+    let horizontal = a[1].is_nan() || a[1] == b[1];
+    // a point every 2.5 mm or so: the line follows the paper (its lines bend) smoothly
+    let len = if horizontal { (b[0] - a[0]).abs() } else { (b[1] - a[1]).abs() * f.g.pitch_mm };
+    let n = ((len / 2.5).ceil() as usize).clamp(24, 160);
     let (o0, o1) = (f.n(0.8), f.n(0.8));
     let amp = (if ruler { 0.08 } else { 0.35 }) * f.c.p.mess;
     let ph = f.rng.random::<f32>() * 6.283;
     let freq = 0.6 + f.rng.random::<f32>();
-    let horizontal = a[1].is_nan() || a[1] == b[1];
     let mut pts = vec![];
     let mut w = vec![];
     for i in 0..n {
@@ -1076,32 +1092,54 @@ fn table(rows: &[Vec<String>], f: &mut Flow) {
         r
     }).collect();
     let pad = 2.0;
-    let nat: Vec<f32> = (0..ncol).map(|j| (rows.iter().map(|r| f.c.estimate(&r[j])).fold(0.0, f32::max) * 1.1 + 2.0 * pad).max(6.0)).collect();
+    let gap = f.c.wgap[0] * f.c.xh;
+    // every word written first: a column is as wide as the writing in it really is (an
+    // estimate let numbers run over the borders)
+    type Word = (Vec<Elem>, f32);
+    let words: Vec<Vec<Vec<Word>>> = rows
+        .iter()
+        .map(|r| {
+            r.iter()
+                .map(|t| {
+                    t.split_whitespace()
+                        .map(|w| {
+                            let wi = f.wi;
+                            f.wi += 1;
+                            f.c.word(w, wi)
+                        })
+                        .collect()
+                })
+                .collect()
+        })
+        .collect();
+    let span = |ws: &[Word]| ws.iter().map(|w| w.1).sum::<f32>() + gap * ws.len().saturating_sub(1) as f32;
+    let nat: Vec<f32> = (0..ncol).map(|j| (words.iter().map(|r| span(&r[j])).fold(0.0, f32::max) + 2.0 * pad).max(6.0)).collect();
     let scale = (f.width() / nat.iter().sum::<f32>()).min(1.0);
     let widths: Vec<f32> = nat.iter().map(|w| w * scale).collect();
     let mut xs = vec![0.0f32];
     for w in &widths {
         xs.push(xs.last().unwrap() + w);
     }
-    let split = |c: &Composer, text: &str, width: f32| -> Vec<String> {
+    // a cell's words in lines that fit its column
+    let split = |ws: Vec<Word>, width: f32| -> Vec<Vec<Word>> {
         let mut lines = vec![];
-        let mut cur = String::new();
-        for w in text.split_whitespace() {
-            let cand = if cur.is_empty() { w.to_string() } else { format!("{cur} {w}") };
-            if !cur.is_empty() && c.estimate(&cand) * 1.1 > width - 2.0 * pad {
+        let (mut cur, mut x): (Vec<Word>, f32) = (vec![], 0.0);
+        for w in ws {
+            if !cur.is_empty() && x + gap + w.1 > width - 2.0 * pad {
                 lines.push(std::mem::take(&mut cur));
-                cur = w.to_string();
-            } else {
-                cur = cand;
+                x = 0.0;
             }
+            x += if cur.is_empty() { w.1 } else { gap + w.1 };
+            cur.push(w);
         }
         if !cur.is_empty() || lines.is_empty() {
             lines.push(cur);
         }
         lines
     };
-    let cells: Vec<Vec<Vec<String>>> = rows.iter().map(|r| r.iter().enumerate().map(|(j, t)| split(&*f.c, t, widths[j])).collect()).collect();
-    // borders sit on the paper's lines; each row's text sits just above its bottom border
+    let cells: Vec<Vec<Vec<Vec<Word>>>> = words.into_iter().map(|r| r.into_iter().enumerate().map(|(j, ws)| split(ws, widths[j])).collect()).collect();
+    // borders sit on the paper's lines; each row's text sits in the middle of its row
+    let lift = ((f.g.pitch_mm - 1.6 * f.c.xh) / 2.0).max(0.18 * f.g.pitch_mm);
     f.newline();
     let mut top = f.l;
     let (x0, x1) = (xs[0], *xs.last().unwrap());
@@ -1114,22 +1152,19 @@ fn table(rows: &[Vec<String>], f: &mut Flow) {
             top = f.l;
             f.hline(x0, x1, top as f32, 0.0, true);
         }
-        for k in 0..h {
+        let mut row: Vec<std::vec::IntoIter<Vec<Word>>> = row.into_iter().map(|c| c.into_iter()).collect();
+        for _ in 0..h {
             f.newline();
-            for (j, cl) in row.iter().enumerate() {
-                if let Some(text) = cl.get(k) {
+            for (j, cl) in row.iter_mut().enumerate() {
+                if let Some(line) = cl.next() {
                     let mut x = xs[j] + pad;
-                    for w in text.split_whitespace() {
-                        let wi = f.wi;
-                        f.wi += 1;
-                        let (el, ww) = f.c.word(w, wi);
-                        let lift = 0.18 * f.g.pitch_mm;
+                    for (el, ww) in line {
                         let el = el.into_iter().map(|e| match e {
                             Elem::G { gid, x, l, dy, s, r, sh, seed, wi, ci, p } => Elem::G { gid, x, l, dy: dy - lift, s, r, sh, seed, wi, ci, p },
                             Elem::S { pts, w, p } => Elem::S { pts: pts.into_iter().map(|[a, b, d]| [a, b, d - lift]).collect(), w, p },
                         }).collect();
                         f.put(el, x, None, true);
-                        x += ww + f.c.wgap[0] * f.c.xh;
+                        x += ww + gap;
                     }
                 }
             }
